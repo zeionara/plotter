@@ -1,0 +1,13 @@
+{
+    "name": "Plotter",
+    "description": "A chrome extension that add some missing functionality to the desmos plotting tool",
+    "version": "1.0",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "utils.js"
+    },
+    "permissions": ["storage", "activeTab", "scripting"],
+    "action": {
+        "default_popup": "assets/popup.html"
+    }
+}
