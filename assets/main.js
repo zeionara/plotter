@@ -1,41 +1,38 @@
-// Initialize button with user's preferred color
-// let changeColor = document.getElementById("changeColor");
+let toolPaneSwitcher = document.getElementById("toolpane-visibility-switcher")
 
-// console.log('FOO BAR')
+async function logVisibility() {
+    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    chrome.storage.sync.get(`isToolpaneVisibilityEnabledOnTab${tab.id}`, ({ isToolpaneVisibilityEnabled }) => {
+        console.log(isToolpaneVisibilityEnabledOnTab)
+    })
+    // return function() {
+    //    console.log(message)
+    // }
+}
+document.addEventListener("DOMContentLoaded", async () => {
+    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-// chrome.storage.sync.get("color", ({ color }) => {
-//   changeColor.style.backgroundColor = color;
-// });
-
-// When the button is clicked, inject setPageBackgroundColor into current page
-// changeColor.addEventListener("click", async () => {
-  
-//     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  
-//     chrome.scripting.executeScript({
-//       target: { tabId: tab.id },
-//       function: setPageBackgroundColor,
-//     });
-//   });
-  
-//   // The body of this function will be executed as a content script inside the
-//   // current page
-//   function setPageBackgroundColor() {
-//     console.log('clicked')
-//     chrome.storage.sync.get("color", ({ color }) => {
-//       document.body.style.backgroundColor = color;
-//     });
-//   }
-
-let toolPaneSwitcher = document.getElementById("toolpane")
-chrome.storage.sync.get("isToolpaneVisibilityEnabled", ({ isToolpaneVisibilityEnabled }) => {
-  toolPaneSwitcher.checked = isToolpaneVisibilityEnabled
+    chrome.storage.sync.get(`isToolpaneVisibilityEnabledOnTab${tab.id}`, ({ isToolpaneVisibilityEnabled }) => {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          function: logVisibility,
+        });
+        if (isToolpaneVisibilityEnabled || isToolpaneVisibilityEnabled === null) {
+            toolPaneSwitcher.checked = true
+        } else {
+            toolPaneSwitcher.checked = false
+        }
+    });
 });
 
 toolPaneSwitcher.addEventListener("click", async () => {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   let isToolpaneVisibilityEnabled = toolPaneSwitcher.checked
+  let key = `isToolpaneVisibilityEnabledOnTab${tab.id}`
+
   chrome.storage.sync.set({ isToolpaneVisibilityEnabled });
+  chrome.storage.sync.set({ key: isToolpaneVisibilityEnabled })
+
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
     function: switchToolpaneVisibility,
@@ -45,6 +42,7 @@ toolPaneSwitcher.addEventListener("click", async () => {
 function switchToolpaneVisibility()
 {
   let pane = document.getElementsByClassName('dcg-overgraph-pillbox-elements')[0]
+  console.log('test')
   if (pane) {
     chrome.storage.sync.get("isToolpaneVisibilityEnabled", ({ isToolpaneVisibilityEnabled }) => {
         if (isToolpaneVisibilityEnabled) {
